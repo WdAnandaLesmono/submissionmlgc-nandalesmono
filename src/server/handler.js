@@ -33,11 +33,13 @@ const crypto = require('crypto');
 const storeData = require('../services/storeData');
 
 const postPredictHandler = async (request, h) => {
-  await storeData(id, data);
+  
+  
   try {
     const { image } = request.payload;
     const { model } = request.server.app;
 
+    
     if (Buffer.byteLength(image) > 1000000) {
       const response = h.response({
         status: 'fail',
@@ -47,7 +49,7 @@ const postPredictHandler = async (request, h) => {
       return response;
     }
 
-    const { confidenceScore, label, suggestion } = await predictClassification(model, image);
+    const { label, suggestion } = await predictClassification(model, image);
     const id = crypto.randomUUID();
     const createdAt = new Date().toISOString();
 
@@ -55,9 +57,10 @@ const postPredictHandler = async (request, h) => {
       "id": id,
       "result": label,
       "suggestion": suggestion,
-      "confidenceScore": confidenceScore,
       "createdAt": createdAt
     }
+
+    await storeData(id, data);  
 
     const response = h.response({
       status: 'success',
